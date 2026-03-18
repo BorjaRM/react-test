@@ -1,34 +1,29 @@
 import { useState, useEffect, useCallback } from "react";
-import type { Product } from "@/types/product";
 
-const API_BASE_URL = "https://fakestoreapi.com/products";
+const CATEGORIES_URL = "https://fakestoreapi.com/products/categories";
 
-interface UseProductsReturn {
-  products: Product[];
+interface UseCategoriesReturn {
+  categories: string[];
   loading: boolean;
   error: string | null;
 }
 
-export function useProducts(category?: string): UseProductsReturn {
-  const [products, setProducts] = useState<Product[]>([]);
+export function useCategories(): UseCategoriesReturn {
+  const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchProducts = useCallback(
+  const fetchCategories = useCallback(
     async (signal: AbortSignal): Promise<void> => {
       try {
-        const url = category
-          ? `${API_BASE_URL}/category/${encodeURIComponent(category)}`
-          : API_BASE_URL;
-
-        const response = await fetch(url, { signal });
+        const response = await fetch(CATEGORIES_URL, { signal });
 
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
 
-        const data: Product[] = await response.json();
-        setProducts(data);
+        const data: string[] = await response.json();
+        setCategories(data);
       } catch (err: unknown) {
         if (err instanceof DOMException && err.name === "AbortError") {
           return;
@@ -40,20 +35,16 @@ export function useProducts(category?: string): UseProductsReturn {
         setLoading(false);
       }
     },
-    [category],
+    [],
   );
 
   useEffect(() => {
-    setProducts([]);
-    setLoading(true);
-    setError(null);
-
     const controller = new AbortController();
-    fetchProducts(controller.signal);
+    fetchCategories(controller.signal);
     return () => {
       controller.abort();
     };
-  }, [fetchProducts]);
+  }, [fetchCategories]);
 
-  return { products, loading, error };
+  return { categories, loading, error };
 }

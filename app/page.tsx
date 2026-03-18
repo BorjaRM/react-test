@@ -1,11 +1,30 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { useProducts } from "@/hooks/useProducts";
+import { useCategories } from "@/hooks/useCategories";
 import { ProductGrid } from "@/components/product/ProductGrid";
+import { CategoryFilter } from "@/components/layout/CategoryFilter";
 import { Spinner } from "@/components/ui/Spinner";
 
 export default function Home() {
-  const { products, loading, error } = useProducts();
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const handleSelectCategory = useCallback(
+    (category: string | null) => {
+      setSelectedCategory(category);
+    },
+    [],
+  );
+
+  const { products, loading, error } = useProducts(
+    selectedCategory ?? undefined,
+  );
+  const {
+    categories,
+    loading: categoriesLoading,
+    error: categoriesError,
+  } = useCategories();
 
   return (
     <div className="flex flex-col gap-6">
@@ -15,6 +34,14 @@ export default function Home() {
           Explora nuestro catálogo de productos.
         </p>
       </div>
+
+      {!categoriesLoading && !categoriesError && (
+        <CategoryFilter
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={handleSelectCategory}
+        />
+      )}
 
       {loading && <Spinner />}
 
@@ -27,7 +54,15 @@ export default function Home() {
         </div>
       )}
 
-      {!loading && !error && <ProductGrid products={products} />}
+      {!loading && !error && products.length === 0 && (
+        <p className="py-12 text-center text-sm text-gray-500">
+          No se encontraron productos en esta categoría.
+        </p>
+      )}
+
+      {!loading && !error && products.length > 0 && (
+        <ProductGrid products={products} />
+      )}
     </div>
   );
 }
