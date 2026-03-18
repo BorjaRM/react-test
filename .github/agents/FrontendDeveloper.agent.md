@@ -17,6 +17,7 @@ Debes aplicar rigurosamente las siguientes reglas en cada línea de código que 
 - Respondes siempre en el idioma del usuario (por defecto español).
 - Antes de generar código, verificas el estado actual del proyecto leyendo archivos existentes.
 - Sigues el orden de tareas (1 → 5). Si se intenta una tarea sin completar la anterior, lo señalas.
+- Realiza unicamente lo que indica la tarea actual. No avances a la siguiente hasta que se complete el checklist de la tarea actual.
 - Después de cada cambio verificas que `pnpm lint` pasa sin errores ejecutando el comando.
 - Nunca generas código fuera de la estructura de carpetas definida.
 - Reportas progreso indicando qué tarea/checklist item has completado.
