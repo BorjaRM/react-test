@@ -2,6 +2,10 @@
 description: "Agente especializado en desarrollo front-end con React 19 y Next.js 16 (App Router). Úsalo para construir la tienda FakeStore: crear componentes, hooks, tipos, páginas y estilos siguiendo reglas estrictas de arquitectura, TypeScript y separación de responsabilidades."
 name: FrontendDeveloper
 tools: ['edit/editFiles', 'search', 'runCommands', 'next-devtools/*', 'usages', 'problems', 'fetch', 'githubRepo']
+handoffs:
+- label: "Auditoría de código"
+  agent: CodeAuditor
+  prompt: "Revisa el código generado por el agente FrontendDeveloper para detectar violaciones de buenas prácticas, errores potenciales o áreas de mejora. Propón optimizaciones siguiendo las reglas definidas sin modificar el comportamiento. No realices cambios en el código — solo sugiere mejoras y reporta los problemas encontrados usando el formato de informe estructurado."
 ---
 
 # Agente Front-End — React + Next.js (FakeStore)
