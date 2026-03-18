@@ -74,3 +74,48 @@
 - [x] Imports con path alias `@/`
 - [x] ESLint limpio (`pnpm lint` sin errores ni warnings)
 - [x] TypeScript limpio (`npx tsc --noEmit` sin errores)
+
+---
+
+## Tarea 3 — Filtrado por categoría ✅
+
+### Cambios realizados
+
+| Archivo | Cambio | Justificación |
+|---------|--------|---------------|
+| `hooks/useCategories.ts` | Creación del hook `useCategories` con `useState`, `useEffect`, `useCallback` y `AbortController`. Endpoint extraído como constante `CATEGORIES_URL`. Retorno tipado con interfaz `UseCategoriesReturn` | Encapsula la obtención de categorías de la API en un hook dedicado, separando esta responsabilidad del hook de productos y del componente de filtro |
+| `hooks/useProducts.ts` | Añadido parámetro opcional `category?: string`. URL dinámica con `encodeURIComponent`. Constante renombrada de `API_URL` a `API_BASE_URL`. Dependencia `[category]` en `useCallback`. Reset de estado (`setProducts([])`, `setLoading(true)`, `setError(null)`) al inicio del `useEffect` | Permite filtrar productos por categoría vía la API; el reset de estado previene que aparezcan datos de la categoría anterior mientras carga la nueva |
+| `components/layout/CategoryFilter.tsx` | Componente presentacional con `<nav aria-label>`, botón "Todas" + botones por categoría, `aria-pressed` para accesibilidad, clases CSS extraídas a constantes (`BASE_BUTTON_CLASSES`, `ACTIVE_CLASSES`, `INACTIVE_CLASSES`) | Componente sin estado propio que delega toda la lógica al padre vía callbacks; `aria-pressed` comunica el estado activo a lectores de pantalla; constantes de clases eliminan duplicación |
+| `app/page.tsx` | Integración de `useCategories`, `CategoryFilter`, `useState<string \| null>` para categoría seleccionada, `useCallback` en `handleSelectCategory`. Conversión `selectedCategory ?? undefined` para la firma del hook. Empty state cuando `products.length === 0` | Orquesta el filtrado sin mezclar lógica de datos en componentes; `useCallback` evita recrear el handler en cada render; empty state mejora la UX cuando una categoría no tiene productos |
+
+### Explicación técnica
+
+- **Parámetro `category` en `useCallback` de `fetchProducts`:** Al incluir `category` en el array de dependencias de `useCallback`, React genera una nueva referencia de `fetchProducts` cada vez que cambia la categoría. Como el `useEffect` depende de `[fetchProducts]`, esto dispara automáticamente un nuevo fetch con la URL correcta. La cadena reactiva es: `category` cambia → `fetchProducts` se recrea → `useEffect` se re-ejecuta → nuevo fetch.
+- **Reset de estado al inicio del `useEffect`:** Antes de iniciar el fetch, se ejecutan `setProducts([])`, `setLoading(true)` y `setError(null)`. Esto garantiza que al cambiar de categoría: (1) no se muestran productos de la categoría anterior durante la carga, (2) el spinner aparece inmediatamente, y (3) un error previo no persiste visualmente. Cumple el requisito evaluado de *"no aparecen datos de la categoría anterior mientras carga la nueva"*.
+- **`AbortController` en `useCategories`:** Aunque las categorías solo se cargan una vez, el `AbortController` previene memory leaks si el componente se desmonta antes de que el fetch resuelva (ej: navegación rápida del usuario).
+- **`encodeURIComponent` en la URL de categoría:** La API de FakeStore tiene categorías con caracteres especiales (ej: `"men's clothing"`). Sin encoding, la comilla simple rompería la URL. `encodeURIComponent` produce `men%27s%20clothing`, que la API procesa correctamente.
+- **`CategoryFilter` sin estado propio:** Recibe `categories`, `selectedCategory` y `onSelectCategory` como props. No contiene `useState`, `useEffect` ni fetch. El estado de selección se gestiona exclusivamente en `page.tsx`, cumpliendo el requisito de *"componente de filtro sin estado propio"*.
+- **`aria-pressed` en botones de categoría:** Los botones actúan como toggles de selección. `aria-pressed={true|false}` comunica a lectores de pantalla cuál es la categoría activa, mejorando la accesibilidad sin afectar el comportamiento visual.
+- **`useCallback` en `handleSelectCategory`:** Envuelve el setter `setSelectedCategory` con dependencias vacías `[]`, estabilizando la referencia del callback. Esto evita que `CategoryFilter` reciba una prop nueva en cada render del padre, cumpliendo el requisito de *"optimizar la función de selección de categoría para que no se recree en cada render"*.
+- **Conversión `selectedCategory ?? undefined`:** El estado de React usa `null` como valor "sin selección", pero la firma del hook `useProducts(category?: string)` espera `undefined` para cargar todos los productos. El nullish coalescing `??` convierte `null` a `undefined` manteniendo ambas interfaces limpias y semánticamente correctas.
+- **Empty state en `page.tsx`:** Cuando `products.length === 0` sin loading ni error, se muestra un mensaje descriptivo en lugar de un grid vacío. La lógica se gestiona en la página (orquestador), no en `ProductGrid` (presentacional), respetando la separación de responsabilidades.
+
+### Checklist de requisitos
+
+- [x] `useCategories` hook en `hooks/useCategories.ts` con `loading`, `error`, `categories` tipados
+- [x] `useCategories` usa `AbortController` para cleanup
+- [x] `useProducts` acepta parámetro opcional `category`
+- [x] `useProducts` llama a `/products/category/{name}` cuando hay categoría seleccionada
+- [x] `useProducts` limpia productos anteriores al cambiar de categoría (no datos fantasma)
+- [x] `CategoryFilter` es puramente presentacional (sin `useState`, `useEffect` ni fetch)
+- [x] `CategoryFilter` muestra todas las categorías + opción "Todas"
+- [x] `CategoryFilter` indica visualmente la categoría seleccionada
+- [x] `CategoryFilter` usa `aria-pressed` para accesibilidad
+- [x] Handler de selección de categoría envuelto en `useCallback` (no se recrea en cada render)
+- [x] Dependencias de `useCallback` y `useEffect` correctas en todos los hooks
+- [x] Empty state cuando no hay productos para la categoría seleccionada
+- [x] Sin `any` en TypeScript — todos los tipos explícitos
+- [x] Named exports en componentes y hooks
+- [x] Imports con path alias `@/`
+- [x] ESLint limpio (`pnpm lint` sin errores ni warnings)
+- [x] TypeScript limpio (`npx tsc --noEmit` sin errores)

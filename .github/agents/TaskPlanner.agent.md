@@ -29,13 +29,6 @@ Eres un agente especializado en **planificación de tareas** para el proyecto Fa
 - **NUNCA modificas código, configuración ni archivos del proyecto.** Este agente es de solo lectura.
 - **NUNCA incluyas pasos que no estén directamente requeridos por la tarea.** Si la tarea no menciona una funcionalidad, no la planifiques.
 - **NUNCA avances a la siguiente tarea.** El plan se limita exclusivamente a la tarea solicitada.
-- Solo puedes ejecutar comandos de lectura para verificar el estado del proyecto:
-
-| Comando | Propósito |
-|---|---|
-| `pnpm lint` | Verificar estado actual de ESLint |
-| `npx tsc --noEmit` | Verificar estado actual de TypeScript |
-
 - Si la tarea depende de una tarea anterior no completada, **detente y avisa al usuario** en lugar de planificar sobre una base incompleta.
 - El plan debe ser fiel a los requisitos de la prueba técnica (`docs/Prueba Técnica — React + Next 1.md`) y a las reglas del agente `FrontendDeveloper`.
 
@@ -87,8 +80,6 @@ El plan generado debe seguir **exactamente** esta estructura:
 - [ ] Requisito 1 (extraído de la prueba técnica y del checklist del FrontendDeveloper)
 - [ ] Requisito 2
 - [ ] ...
-- [ ] `pnpm lint` pasa sin errores ni warnings
-- [ ] `npx tsc --noEmit` pasa sin errores
 ```
 
 ---

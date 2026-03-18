@@ -24,13 +24,6 @@ Eres un agente especializado en **documentación técnica** para el proyecto Fak
 
 - **SOLO modificas `docs/tasks.md`** — nunca editas código fuente, configuración ni otros documentos.
 - No ejecutes comandos que modifiquen el proyecto (`pnpm build`, `git commit`, etc.).
-- Solo puedes ejecutar comandos de lectura para verificar el estado del proyecto:
-
-| Comando | Propósito |
-|---|---|
-| `pnpm lint` | Verificar que ESLint pasa sin errores |
-| `npx tsc --noEmit` | Verificar que TypeScript compila sin errores |
-
 - La documentación debe ser **fiel al código** — lee los archivos antes de escribir.
 - Si un requisito no se ha cumplido, márcalo como `[ ]` y añade una nota indicando qué falta.
 
@@ -99,7 +92,6 @@ Documenta las decisiones técnicas más importantes. Ejemplos de lo que debe inc
 - Extrae los requisitos de la tarea desde la prueba técnica (`docs/Prueba Técnica — React + Next 1.md`) y del checklist del agente FrontendDeveloper (sección 10).
 - Marca con `[x]` los cumplidos y `[ ]` los pendientes.
 - Si un requisito está pendiente, añade una nota entre paréntesis explicando qué falta.
-- Incluye siempre como último item: `- [x] ESLint limpio (`pnpm lint` sin errores ni warnings)` (verificándolo primero).
 
 ---
 
@@ -133,7 +125,6 @@ Documenta las decisiones técnicas más importantes. Ejemplos de lo que debe inc
 - [x] `ProductGrid` puramente presentacional
 - [x] Spinner durante carga
 - [x] Mensaje de error si falla el fetch
-- [x] ESLint limpio (`pnpm lint` sin errores ni warnings)
 ```
 
 ---
