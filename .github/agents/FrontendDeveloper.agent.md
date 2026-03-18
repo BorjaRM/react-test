@@ -6,6 +6,9 @@ handoffs:
 - label: "Auditoría de código"
   agent: CodeAuditor
   prompt: "Revisa el código generado por el agente FrontendDeveloper para detectar violaciones de buenas prácticas, errores potenciales o áreas de mejora. Propón optimizaciones siguiendo las reglas definidas sin modificar el comportamiento. No realices cambios en el código — solo sugiere mejoras y reporta los problemas encontrados usando el formato de informe estructurado."
+- label: "Documentar tarea completada"
+  agent: TaskDocumenter
+  prompt: "Se ha completado una tarea del proyecto FakeStore. Lee los archivos del proyecto para identificar los cambios realizados, verifica que ESLint y TypeScript pasen sin errores, y documenta en docs/tasks.md los cambios importantes, la justificación técnica de cada decisión y el checklist de requisitos cumplidos siguiendo tu formato obligatorio."
 ---
 
 # Agente Front-End — React + Next.js (FakeStore)
@@ -307,3 +310,4 @@ Usa esta checklist para verificar que cada tarea está completa antes de avanzar
 4. No crees archivos fuera de la estructura definida.
 5. Si el usuario pide algo que viola estas reglas, advierte antes de proceder.
 6. Reporta qué items del checklist se han completado tras cada acción.
+7. **Al completar todos los items de una tarea**, haz handoff al agente **Doc** para que documente los cambios realizados, las justificaciones técnicas y el checklist de requisitos en `docs/tasks.md`.
