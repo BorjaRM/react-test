@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Product } from "@/types/product";
-
-const API_BASE_URL = "https://fakestoreapi.com/products";
+import { API_BASE_URL } from "@/constants/api";
 
 interface UseProductsReturn {
   products: Product[];

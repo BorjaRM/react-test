@@ -1,28 +1,30 @@
 import { useState, useEffect, useCallback } from "react";
-import { CATEGORIES_URL } from "@/constants/api";
+import type { Product } from "@/types/product";
+import { API_BASE_URL } from "@/constants/api";
 
-interface UseCategoriesReturn {
-  categories: string[];
+interface UseProductReturn {
+  product: Product | null;
   loading: boolean;
   error: string | null;
 }
 
-export function useCategories(): UseCategoriesReturn {
-  const [categories, setCategories] = useState<string[]>([]);
+export function useProduct(id: string): UseProductReturn {
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCategories = useCallback(
+  const fetchProduct = useCallback(
     async (signal: AbortSignal): Promise<void> => {
       try {
-        const response = await fetch(CATEGORIES_URL, { signal });
+        const url = `${API_BASE_URL}/${encodeURIComponent(id)}`;
+        const response = await fetch(url, { signal });
 
         if (!response.ok) {
           throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
 
-        const data: string[] = await response.json();
-        setCategories(data);
+        const data: Product = await response.json();
+        setProduct(data);
       } catch (err: unknown) {
         if (err instanceof DOMException && err.name === "AbortError") {
           return;
@@ -34,16 +36,20 @@ export function useCategories(): UseCategoriesReturn {
         setLoading(false);
       }
     },
-    [],
+    [id],
   );
 
   useEffect(() => {
+    setProduct(null);
+    setLoading(true);
+    setError(null);
+
     const controller = new AbortController();
-    fetchCategories(controller.signal);
+    fetchProduct(controller.signal);
     return () => {
       controller.abort();
     };
-  }, [fetchCategories]);
+  }, [fetchProduct]);
 
-  return { categories, loading, error };
+  return { product, loading, error };
 }
