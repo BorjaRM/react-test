@@ -119,3 +119,55 @@
 - [x] Imports con path alias `@/`
 - [x] ESLint limpio (`pnpm lint` sin errores ni warnings)
 - [x] TypeScript limpio (`npx tsc --noEmit` sin errores)
+
+---
+
+## Tarea 4 — Página de detalle ✅
+
+### Cambios realizados
+
+| Archivo | Cambio | Justificación |
+|---------|--------|---------------|
+| `hooks/useProduct.ts` | Creación del hook `useProduct(id: string)` con `useState`, `useEffect`, `useCallback` y `AbortController`. Retorno tipado con interfaz `UseProductReturn`. Importa `API_BASE_URL` desde `@/constants/api` | Encapsula el fetch de un producto individual en un hook dedicado, separando la obtención de datos de la presentación. Reutiliza la constante centralizada evitando duplicación |
+| `app/products/[id]/page.tsx` | Página de detalle con `"use client"`, `useParams` para leer el `id`, `useRouter` para navegación de vuelta, `useMemo` para construir `FormattedProduct` con title case y precio formateado, `useCallback` en `handleGoBack` | Orquesta los hooks de Next.js y React para cumplir la tarea: lee el `id` de la URL, obtiene datos vía `useProduct`, transforma con `useMemo`, y navega de vuelta con botón |
+| `constants/api.ts` | Creación del módulo con `API_BASE_URL` y `CATEGORIES_URL` exportadas | Centraliza las URLs de la API en un único archivo, eliminando la duplicación que existía entre `useProduct.ts`, `useProducts.ts` y `useCategories.ts` (principio DRY) |
+| `hooks/useProducts.ts` | Reemplazada constante local `API_BASE_URL` por import desde `@/constants/api` | Eliminación de duplicación; la URL base se gestiona desde un único punto |
+| `hooks/useCategories.ts` | Reemplazada constante local `CATEGORIES_URL` por import desde `@/constants/api` | Eliminación de duplicación; consistencia con el resto de hooks |
+| `components/ui/Spinner.tsx` | Añadida prop opcional `label?: string` con valor por defecto `"Cargando..."`. Interfaz `SpinnerProps` tipada | Permite que el texto accesible (`sr-only`) sea contextual: la página de detalle pasa `"Cargando producto..."` mientras que la página principal usa el valor por defecto. Mejora la accesibilidad sin romper usos existentes |
+
+### Explicación técnica
+
+- **`useProduct` con el mismo patrón que `useProducts`:** El hook sigue la misma arquitectura establecida en la Tarea 2 (`useCallback` + `AbortController` + filtro de `AbortError` + `response.ok`), garantizando consistencia en el manejo de estados y cleanup. La diferencia es que retorna `Product | null` en lugar de `Product[]`, y su dependencia de `useCallback` es `[id]` en lugar de `[category]`.
+- **`useParams<{ id: string }>()` de Next.js:** Lee el parámetro dinámico `[id]` de la URL. El genérico `<{ id: string }>` proporciona tipado en el consumidor. En una ruta `[id]` (no catch-all `[...id]`), Next.js siempre devuelve `string`, por lo que el cast es seguro.
+- **`useMemo` con transformación multi-campo sobre el objeto completo:** Construye un `FormattedProduct` que incluye `formattedTitle` (title case vía regex `/\b\w/g`), `formattedPrice` (`toLocaleString("es-ES", { style: "currency", currency: "EUR" })`) y `formattedCategory` (title case). La dependencia `[product]` asegura que solo se recalcula cuando cambia el producto. La transformación de tres campos justifica el uso de `useMemo` frente a hacerlo inline en cada render.
+- **Title case con `.replace(/\b\w/g, char => char.toUpperCase())`:** Capitaliza la primera letra de cada palabra. Se eligió este enfoque sobre `charAt(0).toUpperCase() + slice(1)` que solo capitalizaba la primera letra del string completo, cumpliendo mejor el requisito de *"título capitalizado"* y *"categoría legible"*.
+- **`useCallback` en `handleGoBack`:** Envuelve `router.back()` con dependencia `[router]`, estabilizando la referencia del callback. Ambos botones "← Volver" (estado de error y estado normal) referencian `handleGoBack` en lugar de crear arrow functions inline, evitando recreaciones innecesarias.
+- **`Spinner` con prop `label` configurable:** La prop tiene un valor por defecto `"Cargando..."` para no romper los usos existentes (retrocompatible). La página de detalle pasa `label="Cargando producto..."` para que el texto accesible sea semánticamente correcto en el contexto de carga de un único producto.
+- **`constants/api.ts` como módulo centralizado:** `CATEGORIES_URL` se construye como template literal de `API_BASE_URL`, garantizando que cualquier cambio en la URL base se propague automáticamente. Los tres hooks importan desde este módulo, eliminando la duplicación detectada en la auditoría.
+- **`priority` en `<Image>` de detalle:** Indica a Next.js que la imagen del producto es el Largest Contentful Paint (LCP) de la página, precargándola con prioridad alta para mejorar el rendimiento percibido.
+- **Renderizado condicional con early returns:** `loading` → Spinner, `error` → mensaje + botón volver, `!formattedProduct` → null. Este patrón de guards evita anidación excesiva y hace explícito cada estado posible de la página.
+
+### Checklist de requisitos
+
+- [x] Hook `useProduct` en `hooks/useProduct.ts` con named export
+- [x] `useProduct` maneja `loading`, `error` y `product` con tipado explícito (sin `any`)
+- [x] `useProduct` usa `AbortController` para cancelar fetch al desmontar
+- [x] `useProduct` filtra `AbortError` para no mostrar cancelaciones como error
+- [x] `useProduct` verifica `response.ok` antes de parsear JSON
+- [x] Página `/products/[id]/page.tsx` creada con `"use client"`
+- [x] `id` leído con `useParams` de `next/navigation`
+- [x] `useMemo` aplicado sobre el objeto producto completo, retornando `FormattedProduct`
+- [x] `useMemo` transforma múltiples campos: título en title case, precio con moneda (EUR), categoría en title case
+- [x] Dependencia de `useMemo` es `[product]` — solo se recalcula cuando cambia el producto
+- [x] Botón de navegación de vuelta al grid con `useRouter().back()` envuelto en `useCallback`
+- [x] Estados de carga (`Spinner` con label contextual) y error correctamente manejados
+- [x] `Spinner` mejorado con prop `label` configurable (retrocompatible con usos existentes)
+- [x] Constantes de API centralizadas en `constants/api.ts` (DRY)
+- [x] Hooks `useProducts` y `useCategories` refactorizados para importar de `@/constants/api`
+- [x] Sin fetch ni lógica de datos dentro de componentes
+- [x] Sin `any` en TypeScript — todos los tipos explícitos
+- [x] Sin `console.log` en el código
+- [x] Named exports en componentes y hooks
+- [x] Imports con path alias `@/`
+- [x] ESLint limpio (`pnpm lint` sin errores ni warnings)
+- [x] TypeScript limpio (`npx tsc --noEmit` sin errores)
